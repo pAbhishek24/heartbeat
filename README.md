@@ -10,7 +10,7 @@ Python program to read heart beats provide from Healt App - from iPhone
      2.2 HeartRateVariabilityMetadataList
 3. After reading heart rate it generates 2 CSV file
      3.1 heartbeat.csv - containing the heart beats per minute from available source
-     3.2 heartbeat_.csv -contains beat information per milli second
+     3.2 heartbeat_metaList.csv -contains beat information per milli second
 
 To execute program
  1. Create client_id and secrete key for the folder in which data will be placed
