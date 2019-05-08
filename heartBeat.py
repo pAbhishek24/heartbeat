@@ -21,7 +21,8 @@ counter         = 0
 occurance       = 0
 current_workdir = os.getcwd()                  # Getting Current working directory Information
 xmlFile         = current_workdir + '/' + 'apple_health_export' + '/' + 'export.xml'
-hBFile          = current_workdir + '/' +  'heartbeat.csv'
+beatFile        = current_workdir + '/' +  'heartbeat.csv
+hBFile          = current_workdir + '/' +  'heartbeat_List.csv'
 
 
 
@@ -54,6 +55,41 @@ else:
         rateVarSSDNList =  parseFile.getElementsByTagName('HeartRateVariabilityMetadataList')
         rateVarList = parseFile.getElementsByTagName('InstantaneousBeatsPerMinute')
         print('+++ Message : Parsing the XML file ')
+        # Capturing the heart beat data
+        with open(beatFile,'w') as hbeatFile:
+            hbTFile = csv.writer(hbeatFile)
+            for recData in recordList:
+                if ((occurance == 0) and (recData.attributes['type'].value == "HKQuantityTypeIdentifierHeartRate")):
+                    sourceName = "SOURCE NAME"
+                    sourceVers = "SOURCE VERSION"
+                    measurUnit = "BEATS/MIN"
+                    startDate  = "CAPTURE DATE"
+                    startTime  = "CAPTURE TIME"
+                    beatsCount = "HEART BEATS"
+                    #print(sourceName,":",sourceVers,":",measurUnit,":",startDate,":",startTime,":",beatsCount)
+                    hbHeadRow  = [sourceName,sourceVers,measurUnit,startDate,startTime,beatsCount]
+                    hbTFile.writerow(hbHeadRow)
+                    
+
+                if recData.attributes['type'].value == "HKQuantityTypeIdentifierHeartRate":
+                    sourceName = recData.attributes['sourceName'].value
+                    sourceVers = recData.attributes['sourceVersion'].value
+                    measurUnit = recData.attributes['unit'].value
+                    startDate  = recData.attributes['startDate'].value[:10]
+                    startTime  = recData.attributes['startDate'].value[11:19]
+                    beatsCount = recData.attributes['value'].value
+                    #print(sourceName,":",sourceVers,":",measurUnit,":",startDate,":",startTime,":",beatsCount)
+                    hbDataRow  = [sourceName,sourceVers,measurUnit,startDate,startTime,beatsCount]
+                    hbTFile.writerow(hbDataRow)
+                    
+                 occurance = occurance + 1
+                
+        if os.path.isfile(hbTFile):
+            print('+++ Message : CSV file - heartbeat-MetaList, created at Location = ' + hBFile)
+        else:
+            print('!!! Warning  : Unable to locate HeartBeat.csv file')
+            error_found = True
+            
         # Capturing HeartRateVariabilityMetadataList for multiple occurance
         '''for rVarSSDN in rateVarSSDNList:
             occurance = occurance + 1
@@ -77,13 +113,11 @@ else:
                 bFile.writerow(dRow)
                 counter = counter + 1
         if os.path.isfile(hBFile):
-            print('+++ Message : CSV file - heartbeat, created at Location = ' + hBFile)
+            print('+++ Message : CSV file - heartbeat-MetaList, created at Location = ' + hBFile)
         else:
             print('!!! Warning  : Unable to locate HeartBeat.csv file')
             error_found = True
             
-        
-
 if error_found:
     print('!!! Script completed with error !!! ')
     sys.exit(1)
